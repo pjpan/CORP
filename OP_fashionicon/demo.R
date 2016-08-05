@@ -50,7 +50,9 @@ weight_AvgUidScore <- c(0.2)
 weight_Iscitymatch <- c(0.2)
 weight_IsProvincematch <- c(0.1)
 weight_Avggift <- c(0.8)
-weight_AgeGap <- c(0.3)
+weight_AgeGap <- c(-0.2)
+
+save(eid_info, uid_eid_mapping, uid_info, uid_op_services, uid_transform_total, file = './data/uid_eid.rds')
 
 # uid_eid_mapping
 uid_canditie <- c('2031738135')
@@ -71,27 +73,31 @@ uid_eid_mapping <- uid_eid_mapping%>%
 uid_eid_mapping <- uid_eid_mapping%>%
     mutate(positivelevel= ifelse(score>3,1,ifelse(score<3,-1,0))) # 如果评分<3分，则为负推荐；
 
+# 生成agegap;
+uid_eid_mapping <- uid_eid_mapping%>%
+    mutate(agegap = (as.integer(num_age)-age)/100)
+
+# uid_eid_mapping%>%View()
 
 # 对年龄进行分桶
-uid_eid_mapping <- uid_eid_mapping %>%
-  mutate(
-    age_cln = ifelse(age < 14 | age > 100, -1, age),
-    age_bucket = cut(age, breaks = c(min(age_cln), 19, 24,
-                                     29, 34, 39, 44, 49, 54,
-                                     59, 64, 69, 74, 79, 84,
-                                     89, 94, 99, max(age_cln)
-    ))
-    ,age_bucket = mapvalues(age_bucket,
-                           from=c("(19,24]", "(24,29]", "(29,34]", "(34,39]",
-                                  "(39,44]", "(44,49]", "(49,54]", "(54,59]",
-                                  "(59,64]", "(64,69]", "(69,74]", "(74,79]",
-                                  "(79,84]", "(84,89]", "(89,94]", "(94,99]", "(99,150]"),
-                           to=c("20-24", "25-29", "30-34", "35-39",
-                                "40-44", "45-49", "50-54", "55-59",
-                                "60-64", "65-69", "70-74", "75-79",
-                                "80-84", "85-89", "90-94", "95-99", "100+"))
-  )
-
+# uid_eid_mapping <- uid_eid_mapping %>%
+#   mutate(
+#     age_cln = ifelse(age < 14 | age > 100, -1, age),
+#     age_bucket = cut(age, breaks = c(min(age_cln), 19, 24,
+#                                      29, 34, 39, 44, 49, 54,
+#                                      59, 64, 69, 74, 79, 84,
+#                                      89, 94, 99, max(age_cln)
+#     ))
+#     ,age_bucket = mapvalues(age_bucket,
+#                            from=c("(19,24]", "(24,29]", "(29,34]", "(34,39]",
+#                                   "(39,44]", "(44,49]", "(49,54]", "(54,59]",
+#                                   "(59,64]", "(64,69]", "(69,74]", "(74,79]",
+#                                   "(79,84]", "(84,89]", "(89,94]", "(94,99]", "(99,150]"),
+#                            to=c("20-24", "25-29", "30-34", "35-39",
+#                                 "40-44", "45-49", "50-54", "55-59",
+#                                 "60-64", "65-69", "70-74", "75-79",
+#                                 "80-84", "85-89", "90-94", "95-99", "100+"))
+#   )
 
 # 计算出最后的得分
 uid_eid_mapping%>%
@@ -100,30 +106,7 @@ uid_eid_mapping%>%
                       +times*weight_Servertimes
                       +worktime*weight_workexperience
                       +weight_zodiacuid*zodiac_uid
-                      +positivelevel*weight_positivelevel)%>%
+                      +positivelevel*weight_positivelevel
+                      +agegap*weight_AgeGap)%>%
   arrange(desc(totalscore))%>%
   View()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
