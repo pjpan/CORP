@@ -1,28 +1,27 @@
 library(shiny)
-library(datasets)
 
-# Define server logic required to summarize and view the 
-# selected dataset
+# Load the ggplot2 package which provides
+# the 'mpg' dataset.
+library(ggplot2)
+
+# Define a server for the Shiny app
 shinyServer(function(input, output) {
   
-  # Return the requested dataset
-  datasetInput <- reactive({
-    switch(input$dataset,
-           "rock" = rock,
-           "pressure" = pressure,
-           "cars" = cars)
-  })
+  # Filter data based on selections
+  output$uideid <- DT::renderDataTable(DT::datatable({
+    data <- mpg
+    if (input$man != "All") {
+      data <- data[data$manufacturer == input$man,]
+    }
+    if (input$cyl != "All") {
+      data <- data[data$cyl == input$cyl,]
+    }
+    if (input$trans != "All") {
+      data <- data[data$trans == input$trans,]
+    }
+    data
+  }))
   
-  # Generate a summary of the dataset
-  output$summary <- renderPrint({
-    dataset <- datasetInput()
-    summary(dataset)
-  })
-  
-  # Show the first "n" observations
-  output$view <- renderTable({
-    head(datasetInput(), n = input$obs)
-  })
 })
 
 
@@ -30,7 +29,7 @@ shinyServer(function(input, output) {
 #   # Logic to subset the data based on the placeIds selection
 #   plotData <- reactive({
 #     out <- dataSubset
-#     
+#
 #     # Subset the original data if the place selection is not empty
 #     if(input$placeIdSel != ""){
 #       out <- out[place_id == input$placeIdSel]
