@@ -43,7 +43,7 @@ weight_isgendermatch <- c(-0.5) # 性别是否匹配
 weight_zodiacuid <- c(-0.2)  # 成为专属客服次数
 weight_workexperience <- c(0.2) # eid工作年限
 weight_avgscore <- c(0.2)       # 网红的平均得分
-weight_positivelevel <- c(0.3)  # uid和eid之间的正向评价指数,-1/0/1
+weight_positivelevel <- c(1)  # uid和eid之间的正向评价指数,-1/0/1
 weight_Servertimes <- c(-0.1)    # eid的服务次数
 weight_Iszodiacuid <- c(0.5)    # 是否uid的
 weight_AvgUidScore <- c(0.2)
@@ -52,7 +52,7 @@ weight_IsProvincematch <- c(0.1)
 weight_Avggift <- c(0.8)
 weight_AgeGap <- c(-0.2)
 
-save(eid_info, uid_eid_mapping, uid_info, uid_op_services, uid_transform_total, file = './data/uid_eid.rds')
+saveRDS(c(eid_info, uid_eid_mapping, uid_info, uid_op_services, uid_transform_total), file = './data/uid_eid.rds')
 
 # uid_eid_mapping
 uid_canditie <- c('2031738135')
