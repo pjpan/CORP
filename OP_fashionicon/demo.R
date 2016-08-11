@@ -52,7 +52,7 @@ weight_IsProvincematch <- c(0.1)
 weight_Avggift <- c(0.8)
 weight_AgeGap <- c(-0.2)
 
-saveRDS(c(eid_info, uid_eid_mapping, uid_info, uid_op_services, uid_transform_total), file = './data/uid_eid.rds')
+save(eid_info, uid_info, uid_op_services, uid_transform_total, file = './data/uid_eid.rData')
 
 # uid_eid_mapping
 uid_canditie <- c('2031738135')

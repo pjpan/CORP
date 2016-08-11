@@ -24,7 +24,6 @@ shinyUI(
 )
 
 
-
 # # Define UI
 # shinyUI(navbarPage("Facebook V: Predicting Check Ins",
 #                    theme = shinytheme("cerulean"), #united

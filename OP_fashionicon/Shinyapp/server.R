@@ -9,21 +9,85 @@ shinyServer(function(input, output) {
   
   # Filter data based on selections
   output$uideid <- DT::renderDataTable(DT::datatable({
-    data <- mpg
-    if (input$man != "All") {
-      data <- data[data$manufacturer == input$man,]
+    
+    
+    uid_info
+    # uid_eid_mapping
+    print(input$uid)
+    # debug
+   # uid_canditie<- c('_NOCARD13736699099')
+    uid_canditie <- input$uid
+    uid_eid_mapping <- cbind(uid_transform_total%>%
+                               filter(num_uid %in% uid_canditie), eid_info%>%
+                               select(Eid, age, worktime, zodiac_uid, Gender))
+    
+    # join上uid和eid之间的服务关系；
+    uid_eid_mapping <- left_join(uid_eid_mapping, uid_op_services, by = c("num_uid"="uid", "Eid"="eid"), copy = F)
+    
+    # NA赋值成0
+    uid_eid_mapping[is.na(uid_eid_mapping$score), "score"] <- 3
+    uid_eid_mapping[is.na(uid_eid_mapping$times), "times"] <- 0
+    
+    #  Feature变化
+    uid_eid_mapping <- uid_eid_mapping%>%
+      mutate(isgendermatch = num_gender==Gender) # eid和uid的性别是否相同；
+    uid_eid_mapping <- uid_eid_mapping%>%
+      mutate(positivelevel= ifelse(score>3,1,ifelse(score<3,-1,0))) # 如果评分<3分，则为负推荐；
+   
+    uid_eid_mapping <- uid_eid_mapping%>%
+     mutate(worktime2= worktime/20) # 如果评分<3分，则为负推荐；
+    
+   
+   #    针对不同的客户群体，需要进行微调
+   #   客户年龄段    员工年龄段 
+   #    ≤1970         1980-1985
+   #    1971-1980     1986-1990
+   #    1981-1990     1991-1995
+   #    ≥1991         1996-2000
+    # 生成agegap;
+    uid_eid_mapping <- uid_eid_mapping%>%
+      mutate(agegap = (as.integer(num_age)-age)/100)
+    
+   uid_eid_mapping <- uid_eid_mapping%>%
+     mutate(agegap = (as.integer(num_age)-age)/100)
+   
+
+   
+   
+   
+   
+   
+   
+        # 计算出最后的得分
+  if(any(uid_eid_mapping$num_complaintimes>0 | uid_eid_mapping$grade==30 | uid_eid_mapping$num_isboss==1)){
+    data <- uid_eid_mapping%>%
+      mutate(totalscore = isgendermatch*weight_isgendermatch
+             +score*weight_AvgUidScore
+             +times*weight_Servertimes
+             +worktime2*weight_workexperience
+             +weight_zodiacuid*zodiac_uid
+             +positivelevel*weight_positivelevel
+             +agegap*weight_AgeGap)%>%
+      arrange(desc(totalscore))%>%select(totalscore, num_uid, num_complaintimes, num_grade, num_age, num_gender, Eid, age, worktime, zodiac_uid, Gender) 
+   } else {
+      data <- uid_eid_mapping%>%
+        mutate(totalscore = isgendermatch*weight_isgendermatch_low
+               +score*weight_AvgUidScore_low
+               +times*weight_Servertimes_low
+               +worktime2*weight_workexperience_low
+               +weight_zodiacuid_low*zodiac_uid
+               +positivelevel*weight_positivelevel_low
+               +agegap*weight_AgeGap_low)%>%
+        arrange(desc(totalscore))%>%select(totalscore, num_uid, num_complaintimes, num_grade, num_age, num_gender, num_isboss, Eid, age, worktime, zodiac_uid, Gender)
     }
-    if (input$cyl != "All") {
-      data <- data[data$cyl == input$cyl,]
-    }
-    if (input$trans != "All") {
-      data <- data[data$trans == input$trans,]
-    }
-    data
+  
+   names(data) <- c("totalscore", "UID", "UID_complaintimes", "UID_grade", "UID_age", "UID_gender", "UID_isboss","EID", "EID_age", "EID_workexperience", "EID_zodiacuids"," EID_Gender")   
+   print(names(data)) 
+   data
+  
   }))
   
 })
-
 
 # shinyServer(function(input, output, session) {
 #   # Logic to subset the data based on the placeIds selection
