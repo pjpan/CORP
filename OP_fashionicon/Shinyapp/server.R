@@ -51,14 +51,11 @@ shinyServer(function(input, output) {
    uid_eid_mapping <- uid_eid_mapping%>%
      mutate(agegap = (as.integer(num_age)-age)/100)
    
-
-   
-   
-   
-   
-   
-   
-        # 计算出最后的得分
+  # 
+  colname_2show <- c("totalscore", "num_uid", "num_complaintimes", "num_grade", "num_age", "num_gender", "num_isboss", "Eid", "age", "worktime", "zodiac_uid", "Gender","positivelevel","times", "score")
+  colname_rename <- c("totalscore", "UID", "UID_complaintimes", "UID_grade", "UID_age", "UID_gender", "UID_isboss","EID", "EID_age", "EID_workexperience", "Num_zodiacuid"," EID_Gender", "UidScoreLevel","Servertimes","AvgUidScore")
+     
+  # 计算出最后的得分
   if(any(uid_eid_mapping$num_complaintimes>0 | uid_eid_mapping$grade==30 | uid_eid_mapping$num_isboss==1)){
     data <- uid_eid_mapping%>%
       mutate(totalscore = isgendermatch*weight_isgendermatch
@@ -68,7 +65,7 @@ shinyServer(function(input, output) {
              +weight_zodiacuid*zodiac_uid
              +positivelevel*weight_positivelevel
              +agegap*weight_AgeGap)%>%
-      arrange(desc(totalscore))%>%select(totalscore, num_uid, num_complaintimes, num_grade, num_age, num_gender, Eid, age, worktime, zodiac_uid, Gender) 
+      arrange(desc(totalscore))
    } else {
       data <- uid_eid_mapping%>%
         mutate(totalscore = isgendermatch*weight_isgendermatch_low
@@ -78,11 +75,13 @@ shinyServer(function(input, output) {
                +weight_zodiacuid_low*zodiac_uid
                +positivelevel*weight_positivelevel_low
                +agegap*weight_AgeGap_low)%>%
-        arrange(desc(totalscore))%>%select(totalscore, num_uid, num_complaintimes, num_grade, num_age, num_gender, num_isboss, Eid, age, worktime, zodiac_uid, Gender)
+        arrange(desc(totalscore))
     }
-  
-   names(data) <- c("totalscore", "UID", "UID_complaintimes", "UID_grade", "UID_age", "UID_gender", "UID_isboss","EID", "EID_age", "EID_workexperience", "EID_zodiacuids"," EID_Gender")   
-   print(names(data)) 
+   
+   data <- data[, colname_2show]
+   names(data) <- colname_rename
+   # print(names(data)) 
+   print(Sys.time())
    data
   
   }))

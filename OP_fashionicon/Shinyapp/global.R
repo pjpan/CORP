@@ -46,3 +46,6 @@ weight_IsProvincematch_low <- c(0.1)
 weight_Avggift_low <- c(0.2)
 weight_AgeGap_low <- c(-0.3)
 
+# shiny::runApp(appDir = "D:/gitcode/CORP/OP_fashionicon/Shinyapp", host = '10.32.100.160', port = 5725, launch.browser = TRUE)
+
+
